@@ -72,7 +72,7 @@ source "virtualbox-iso" "p2" {
                            ["modifyvm", "{{.Name}}", "--clipboard", "bidirectional"], 
                            ["modifyvm", "{{.Name}}", "--vrde", "off"],
                            ["modifyvm", "{{.Name}}", "--nic1", "nat"],
-                           ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,127.0.0.1,2202,,22"],
+                           ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,127.0.0.1,22202,,22"],
                            ["modifyvm", "{{.Name}}", "--nic2", "intnet"],
                            ["modifyvm", "{{.Name}}", "--intnet1", "intnet"],
                            ["modifyvm", "{{.Name}}", "--graphicscontroller","vmsvga"]
@@ -114,7 +114,7 @@ source "virtualbox-iso" "p0" {
                            ["modifyvm", "{{.Name}}", "--clipboard", "bidirectional"], 
                            ["modifyvm", "{{.Name}}", "--vrde", "off"],
                            ["modifyvm", "{{.Name}}", "--nic1", "nat"],
-                           ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,127.0.0.1,2200,,22"],
+                           ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,127.0.0.1,22200,,22"],
                            ["modifyvm", "{{.Name}}", "--nic2", "intnet"],
                            ["modifyvm", "{{.Name}}", "--intnet1", "intnet"],
                            ["modifyvm", "{{.Name}}", "--graphicscontroller","vmsvga"]
@@ -156,7 +156,7 @@ source "virtualbox-iso" "p1" {
                            ["modifyvm", "{{.Name}}", "--clipboard", "bidirectional"], 
                            ["modifyvm", "{{.Name}}", "--vrde", "off"],
                            ["modifyvm", "{{.Name}}", "--nic1", "nat"],
-                           ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,127.0.0.1,2201,,22"],
+                           ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,127.0.0.1,22201,,22"],
                            ["modifyvm", "{{.Name}}", "--nic2", "intnet"],
                            ["modifyvm", "{{.Name}}", "--intnet1", "intnet"],
                            ["modifyvm", "{{.Name}}", "--graphicscontroller","vmsvga"]
