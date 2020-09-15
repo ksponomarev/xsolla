@@ -5,7 +5,7 @@
     update_cache: yes
 
 - name: Config agent
-  shell: /opt/puppetlabs/bin/puppet config set server {{puppet_name}}.{{dns_name}} --section main
+  shell: /opt/puppetlabs/bin/puppet config set server puppet.home.local --section main
   notify: restart-puppet-agent
 
 - name: Request to server

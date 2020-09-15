@@ -91,7 +91,12 @@ source "virtualbox-iso" "p0" {
                            ["modifyvm", "{{.Name}}", "--vram", "16"], 
                            ["modifyvm", "{{.Name}}", "--usb", "off"], 
                            ["modifyvm", "{{.Name}}", "--clipboard", "bidirectional"], 
-                           ["modifyvm", "{{.Name}}", "--vrde", "off"]
+                           ["modifyvm", "{{.Name}}", "--vrde", "off"],
+                           ["modifyvm", "{{.Name}}", "--nic1", "nat"],
+                           ["modifyvm", "{{.Name}}", "--natpf1", "ssh,tcp,127.0.0.1,2200,,22"],
+                           ["modifyvm", "{{.Name}}", "--nic2", "intnet"],
+                           ["modifyvm", "{{.Name}}", "--intnet1", "intnet"],
+                           ["modifyvm", "{{.Name}}", "--graphicscontroller","vmsvga"]
                            ]
 }
 
@@ -151,7 +156,6 @@ build {
 
   provisioner "shell" {
     inline = ["echo ${var.ssh_password}|sudo -S apt-get update -qq",
-              "sudo hostnamectl  set-hostname p0",
               "sudo sed -ie 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers",
               "mkdir -p ~/.ssh", "chmod 700 ~/.ssh","echo ${var.ssh_pub} > ~/.ssh/authorized_keys"]
   }
@@ -165,8 +169,8 @@ build {
   }
   
   provisioner "file"{
-    source = "files/p0/hosts"
-    destination = "/etc/hosts"
+    source = "files/p0/01-netcfg.yaml"
+    destination = "/etc/01-netcfg.yaml"
   }
 }
 
