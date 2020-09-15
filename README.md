@@ -2,7 +2,7 @@
 
 Run [packer](https://www.packer.io/downloads) for building VMs:
 ```bash
-$ packer build -var 'ssh_key=<your_pub_shh_key>' ubuntu18.json.pkr.hcl
+$ packer build -force -var 'ssh_pub=<your_pub_shh_key>' ubuntu18.json.pkr.hcl
 ```
 
 
