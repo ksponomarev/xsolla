@@ -1,3 +1,0 @@
-- name: restart-puppetserver
-  systemd: name=puppetserver.service state=started enabled=yes
-
