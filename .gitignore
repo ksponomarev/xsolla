@@ -1,2 +1,2 @@
 packer_cache/
-1.sh
+group_vars/my.yml

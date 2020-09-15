@@ -1,0 +1,7 @@
+- name: Init puppets
+  hosts: puppetserver
+  remote_user: ubuntu
+  become: true
+  roles:
+    - roles/common
+    - roles/puppetserver

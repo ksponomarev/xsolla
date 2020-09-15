@@ -1,0 +1,36 @@
+- name: Set hostname
+  hostname:
+    name: "{{puppet_name}}"
+
+- name: Copy resolvd.conf
+  template:
+    src: "{{item}}.j2"
+    dest: "/{{item}}"
+  with_items:
+    - etc/systemd/resolved.conf
+
+- name: Restart resolver
+  systemd:
+    name: systemd-resolved.service
+    state: restarted
+
+- name: Install puppetserver
+  # notify: restart-puppetserver
+  apt:
+    name: puppetserver
+    state: latest
+    update_cache: yes
+
+- name: Start daemon
+  systemd: name=puppetserver.service state=started enabled=yes
+
+- name: Push manifests
+  copy:
+    src: "manifests/{{item}}"
+    dest: "/etc/puppetlabs/code/environments/production/manifests/{{item}}"
+  with_items:
+    - user.pp
+    - ssh_config.pp
+
+- name: Install modules
+  shell: /opt/puppetlabs/bin/puppet module install puppet-ssh_keygen
