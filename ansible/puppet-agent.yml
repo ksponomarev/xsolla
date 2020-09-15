@@ -1,7 +1,0 @@
-- name: Init puppets
-  hosts: '*'
-  remote_user: ubuntu
-  become: true
-  roles:
-    - roles/common
-    - roles/puppetclient

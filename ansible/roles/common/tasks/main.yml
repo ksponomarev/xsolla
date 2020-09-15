@@ -1,4 +1,0 @@
-- name: Install repository
-  apt:
-    deb: https://apt.puppet.com/puppet6-release-bionic.deb
-    update_cache: yes

@@ -1,2 +1,0 @@
-- name: restart-puppet-agent
-  systemd: name=puppet.service state=restarted daemon_reload=yes enabled=yes
