@@ -32,7 +32,9 @@ variable "url_iso" {
   default = "http://cdimage.ubuntu.com/releases/bionic/release/ubuntu-18.04.5-server-amd64.iso"
 }
 
-variable "ssh_pub"{}
+variable "ssh_pub"{
+  default = "ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDC5b+YuXn3LrcDcAnmiJXpAC9YGQUCwSlpjwdwEJk8VMysvMDV/DRFrKJTq228/3a6H7+lWIu0FilXwSjwbTTMHZKeI7ua85m8AnlSKEL9z41avI9VxOmD3o00aFfjXvibwPmjlkmMIp5ZHRJUSEl6hlAwJIGs7saaaZFosY0zuOzuMk7mzcALfZMSDA5sXDLSEpY0weS/ABrDsP83BC6TdD5oCfnKca6aq5xlWSTGqoQFf+2e0/cytrL4wS+Ayec+yn5ouPZWZwBZ1NVN56pmj850gML5EVDD2n/gZYHw/dsb0sQi7T0sCDp01Iy1BOuti5okyNvU+KBo0E7s/SWt p@desktop"
+}
 
 # "timestamp" template function replacement
 locals { timestamp = regex_replace(timestamp(), "[- TZ:]", "") }
@@ -165,30 +167,6 @@ source "virtualbox-iso" "p1" {
 
 build {
   sources = [
-    "source.virtualbox-iso.p2"
-    ]
-  provisioner "file"{
-    source = "files/p2/01-netcfg.yaml"
-    destination = "/tmp/01-netcfg.yaml"
-  }
-  provisioner "shell" {
-    inline = ["echo ${var.ssh_password}| sudo -S apt-get update -qq",
-              "sudo sed -ie 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers",
-              "sudo cp /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml",
-              "sudo hostnamectl set-hostname p2",
-              "echo '192.168.1.1 puppet.home.local puppet' | sudo tee -a /etc/hosts",
-              "mkdir -p ~/.ssh", "chmod 700 ~/.ssh","echo ${var.ssh_pub} > ~/.ssh/authorized_keys",
-              "wget https://apt.puppetlabs.com/puppet6-release-bionic.deb -O /tmp/puppet6-release-bionic.deb",
-              "sudo dpkg -i /tmp/puppet6-release-bionic.deb",
-              "sudo apt-get update -qq",
-              "sudo apt-get install -y puppet-agent",
-              "sudo /opt/puppetlabs/bin/puppet config set server puppet.home.local --section main",
-              "sudo sed -i 's/#Domains=/Domains=home.local/' /etc/systemd/resolved.conf"]
-  }
-}
-
-build {
-  sources = [
     "source.virtualbox-iso.p0"
     ]
 
@@ -217,15 +195,51 @@ build {
               "wget https://apt.puppetlabs.com/puppet6-release-bionic.deb -O /tmp/puppet6-release-bionic.deb",
               "sudo dpkg -i /tmp/puppet6-release-bionic.deb",
               "sudo apt-get update -qq",
-              "sudo apt-get install -y puppetserver",
+              "sudo apt-get install -y puppetserver"]
+  }
+
+  provisioner "file"{
+      source = "files/p0/puppet.conf"
+      destination = "/tmp/puppet.conf"
+    }
+
+  provisioner "shell" {
+    inline = [
               "sudo systemctl enable puppetserver",
               "sudo systemctl start puppetserver",
               "sudo cp /tmp/user.pp /etc/puppetlabs/code/environments/production/manifests/user.pp",
+              "sudo cp /tmp/puppet.conf /etc/puppetlabs/puppet/puppet.conf",
               "sudo cp /tmp/ssh_config.pp /etc/puppetlabs/code/environments/production/manifests/ssh_config.pp",
-              "sudo /opt/puppetlabs/bin/puppet module install puppet-ssh_keygen",
+              "sudo /opt/puppetlabs/bin/puppet module install puppet-ssh_keygen", 
+              "sudo /opt/puppetlabs/bin/puppet module install puppetlabs/puppetdb",
               "sudo sed -i 's/#Domains=/Domains=home.local/' /etc/systemd/resolved.conf"]
   }
 }
+
+build {
+  sources = [
+    "source.virtualbox-iso.p2"
+    ]
+  provisioner "file"{
+    source = "files/p2/01-netcfg.yaml"
+    destination = "/tmp/01-netcfg.yaml"
+  }
+  provisioner "shell" {
+    inline = ["echo ${var.ssh_password}| sudo -S apt-get update -qq",
+              "sudo sed -ie 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers",
+              "sudo cp /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml",
+              "sudo hostnamectl set-hostname p2",
+              "echo '192.168.1.1 puppet.home.local puppet' | sudo tee -a /etc/hosts",
+              "mkdir -p ~/.ssh", "chmod 700 ~/.ssh","echo ${var.ssh_pub} > ~/.ssh/authorized_keys",
+              "wget https://apt.puppetlabs.com/puppet6-release-bionic.deb -O /tmp/puppet6-release-bionic.deb",
+              "sudo dpkg -i /tmp/puppet6-release-bionic.deb",
+              "sudo apt-get update -qq",
+              "sudo apt-get install -y puppet-agent",
+              "sudo /opt/puppetlabs/bin/puppet config set server puppet.home.local --section main",
+              "sudo sed -i 's/#Domains=/Domains=home.local/' /etc/systemd/resolved.conf"]
+  }
+}
+
 
 
 build {
