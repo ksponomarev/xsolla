@@ -166,6 +166,7 @@ source "virtualbox-iso" "p1" {
 }
 
 build {
+  name = "p0"
   sources = [
     "source.virtualbox-iso.p0"
     ]
@@ -185,38 +186,37 @@ build {
       destination = "/tmp/user.pp"
     }
 
-  provisioner "shell" {
-    inline = ["echo ${var.ssh_password}| sudo -S apt-get update -qq",
-              "sudo sed -ie 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers",
-              "sudo cp /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml",
-              "echo '127.0.0.1 puppet.home.local puppet' | sudo tee -a /etc/hosts",
-              "mkdir -p ~/.ssh", "chmod 700 ~/.ssh","echo ${var.ssh_pub} > ~/.ssh/authorized_keys",
-              "sudo hostnamectl set-hostname puppet",
-              "wget https://apt.puppetlabs.com/puppet6-release-bionic.deb -O /tmp/puppet6-release-bionic.deb",
-              "sudo dpkg -i /tmp/puppet6-release-bionic.deb",
-              "sudo apt-get update -qq",
-              "sudo apt-get install -y puppetserver"]
-  }
-
   provisioner "file"{
       source = "files/p0/puppet.conf"
       destination = "/tmp/puppet.conf"
     }
+  
+  provisioner "file"{
+      source = "files/p0/pg_hba.conf"
+      destination = "/tmp/pg_hba.conf"
+    }
 
+  provisioner "file"{
+      source = "files/p0/puppetdb.conf"
+      destination = "/tmp/puppetdb.conf"
+    }
+  provisioner "file"{
+      source = "files/p0/setup"
+      destination = "/tmp/setup"
+    }
   provisioner "shell" {
-    inline = [
-              "sudo systemctl enable puppetserver",
-              "sudo systemctl start puppetserver",
-              "sudo cp /tmp/user.pp /etc/puppetlabs/code/environments/production/manifests/user.pp",
-              "sudo cp /tmp/puppet.conf /etc/puppetlabs/puppet/puppet.conf",
-              "sudo cp /tmp/ssh_config.pp /etc/puppetlabs/code/environments/production/manifests/ssh_config.pp",
-              "sudo /opt/puppetlabs/bin/puppet module install puppet-ssh_keygen", 
-              "sudo /opt/puppetlabs/bin/puppet module install puppetlabs/puppetdb",
-              "sudo sed -i 's/#Domains=/Domains=home.local/' /etc/systemd/resolved.conf"]
+    inline = ["echo ${var.ssh_password}| sudo -S apt-get update -qq",
+              "sudo sed -ie 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers",
+              "sudo cp /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml; ",
+              "sudo echo '127.0.0.1 puppet.home.local puppet' | sudo tee -a /etc/hosts; ",
+              "sudo echo 'LANG=en_US.UTF-8' | sudo tee /etc/default/locale; ",
+              "mkdir -p ~/.ssh", "chmod 700 ~/.ssh","echo ${var.ssh_pub} > ~/.ssh/authorized_keys; ",
+              "chmod +x /tmp/setup; sudo su -c '/tmp/setup'"]
   }
 }
 
 build {
+  name = "p2"
   sources = [
     "source.virtualbox-iso.p2"
     ]
@@ -240,9 +240,8 @@ build {
   }
 }
 
-
-
 build {
+  name = "p1"
   sources = [
     "source.virtualbox-iso.p1"
     ]

@@ -18,6 +18,9 @@ file_line { 'PubkeyAuthentication':
   replace           => true
 }
 
-@@ssh_authorized_keys{"${home_dir}/.ssh/authorized_keys"
-
+@@file{"/home/ubuntu/.ssh/authorized_keys":
+  tag     => 'authorized_keys',
+  content => '#First line'
 }
+
+File <<| tag  == 'authorized_keys' |>>
