@@ -17,10 +17,3 @@ file_line { 'PubkeyAuthentication':
   match             => '#PubkeyAuthentication yes',
   replace           => true
 }
-
-@@file{"/home/ubuntu/.ssh/authorized_keys":
-  tag     => 'authorized_keys',
-  content => '#First line'
-}
-
-File <<| tag  == 'authorized_keys' |>>

@@ -8,11 +8,10 @@ $ packer build -force -var 'ssh_pub=<your_pub_shh_key>' ubuntu18.json.pkr.hcl
 ```
 
 
-For init agents:
+If you want you can force init agents. But after start VMs they will connect to server during 2 minutes:
 ```bash
 $ ssh ubuntu@127.0.0.1 -p 22202 -t 'sudo /opt/puppetlabs/bin/puppet agent -t'
 $ ssh ubuntu@127.0.0.1 -p 22201 -t 'sudo /opt/puppetlabs/bin/puppet agent -t'
-$ ssh ubuntu@127.0.0.1 -p 22200 -t 'sudo /opt/puppetlabs/bin/puppetserver ca sign --all'
 ```
 
 For ssh to VMs:

@@ -1,23 +1,31 @@
 #!/bin/bash
 
+prepare(){
+  sed -ie 's/%sudo\tALL=(ALL:ALL) ALL/%sudo\tALL=(ALL:ALL) NOPASSWD:ALL/g' /etc/sudoers
+  cp /tmp/01-netcfg.yaml /etc/netplan/01-netcfg.yaml;
+  echo '127.0.0.1 puppet.home.local puppet' | tee -a /etc/hosts;
+  echo '127.0.0.1 puppetdb.home.local puppetdb' | tee -a /etc/hosts;
+  echo 'LANG=en_US.UTF-8' | tee /etc/default/locale;
+}
+
 func_puppet(){
   locale-gen en_US.UTF-8
   hostnamectl set-hostname puppet;
   wget https://apt.puppetlabs.com/puppet6-release-bionic.deb -O /tmp/puppet6-release-bionic.deb;
   dpkg -i /tmp/puppet6-release-bionic.deb;
   apt-get update -qq;
-  apt-get install -y puppetserver postgresql postgresql-contrib;
+  apt-get install -y puppetserver postgresql postgresql-contrib vim;
   systemctl enable puppetserver;
   systemctl start puppetserver;
 }
 
 func_psql(){
-    apt-get install -y postgresql postgresql-contrib;
-    systemctl enable postgresql;
-    su postgres -c "createuser -DRS puppetdb";
-    su postgres -c "createdb -E UTF8 -O puppetdb puppetdb"
-    su postgres -c "psql puppetdb -c 'create extension pg_trgm'"
-    su postgres -c "psql -c \"alter role puppetdb with password '1'\""
+  apt-get install -y postgresql postgresql-contrib;
+  systemctl enable postgresql;
+  su postgres -c "createuser -DRS puppetdb";
+  su postgres -c "createdb -E UTF8 -O puppetdb puppetdb"
+  su postgres -c "psql puppetdb -c 'create extension pg_trgm'"
+  su postgres -c "psql -c \"alter role puppetdb with password 'puppetdb'\""
 }
 
 
@@ -26,17 +34,26 @@ func_copy(){
   cp /tmp/puppet.conf /etc/puppetlabs/puppet/puppet.conf;
   cp /tmp/puppetdb.conf /etc/puppetlabs/puppet/puppetdb.conf;
   cp /tmp/ssh_config.pp /etc/puppetlabs/code/environments/production/manifests/ssh_config.pp;
+  cp /tmp/authorized_keys.pp /etc/puppetlabs/code/environments/production/manifests/authorized_keys.pp;
   cp /tmp/pg_hba.conf /etc/postgresql/10/main/pg_hba.conf;
+  cp /tmp/routes.yaml /etc/puppetlabs/puppet/routes.yaml;
+  systemctl restart puppetserver
+  systemctl restart postgresql
 }
 
 
 post(){
   /opt/puppetlabs/bin/puppet module install puppet-ssh_keygen;
   /opt/puppetlabs/bin/puppet resource package puppetdb ensure=latest;
+  cp /tmp/database.ini /etc/puppetlabs/puppetdb/conf.d/database.ini
+  /opt/puppetlabs/bin/puppet resource service puppetdb ensure=running enable=true
+  /opt/puppetlabs/bin/puppet resource package puppetdb-termini ensure=latest
   sed -i 's/#Domains=/Domains=home.local/' /etc/systemd/resolved.conf
+  chown -R puppet:puppet $(/opt/puppetlabs/bin/puppet config print confdir)
 }
 
 prepare
+func_puppet
 func_psql
 func_copy
 post
