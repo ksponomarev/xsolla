@@ -3,4 +3,4 @@
   
 }
 
-File <<| tag == "${::hostname}" |>>
+File <<| |>>
